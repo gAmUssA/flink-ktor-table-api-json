@@ -26,5 +26,6 @@ dependencies {
 }
 
 application {
-    mainClass.set("com.demo.flight.processor.jobs.FlightProcessingJobsKt")
+    // For Kotlin object with @JvmStatic main method, we don't need the Kt suffix
+    mainClass.set("com.demo.flight.processor.jobs.FlightProcessingJobs")
 }
