@@ -3,6 +3,7 @@ package com.demo.flight.api
 import com.demo.flight.api.routes.configureRouting
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import io.ktor.http.*
 import io.ktor.serialization.jackson.*
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
@@ -41,8 +42,23 @@ fun Application.configureKtor() {
     }
     
     install(CORS) {
+        // Allow requests from our frontend running on port 9000
+        allowHost("localhost:9000", schemes = listOf("http", "https"))
+        // Also allow any host for development purposes
         anyHost()
+        // Allow common headers
         allowHeader("Content-Type")
+        allowHeader("Authorization")
+        // Allow all HTTP methods
+        allowMethod(HttpMethod.Options)
+        allowMethod(HttpMethod.Get)
+        allowMethod(HttpMethod.Post)
+        allowMethod(HttpMethod.Put)
+        allowMethod(HttpMethod.Delete)
+        // Allow credentials (cookies, etc.)
+        allowCredentials = true
+        // Allow WebSocket connections
+        allowNonSimpleContentTypes = true
     }
     
     install(WebSockets) {
@@ -57,7 +73,7 @@ fun Application.configureKtor() {
     }
     
     install(StatusPages) {
-        exception<Throwable> { call, cause ->
+        exception<Throwable> { _, cause ->
             logger.error(cause) { "Unhandled exception" }
             // Handle exceptions and return appropriate responses
         }

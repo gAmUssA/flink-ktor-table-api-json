@@ -20,7 +20,8 @@ export function setupWebSocket(onMessage: (event: FlightEvent) => void) {
     
     // Create new WebSocket connection
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const wsUrl = `${protocol}//${window.location.host}/api/flights/live`;
+    // Point directly to the API server running on localhost:8090
+    const wsUrl = `${protocol}//localhost:8090/api/flights/live`;
     
     console.log(`Connecting to WebSocket at ${wsUrl}`);
     socket = new WebSocket(wsUrl);
