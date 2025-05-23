@@ -14,7 +14,7 @@ dependencies {
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.2")
     
     // Command line parsing
-    implementation("com.github.ajalt.clikt:clikt:4.2.0")
+    implementation("com.github.ajalt.clikt:clikt:4.4.0")
     
     // Faker for generating realistic data
     implementation("com.github.javafaker:javafaker:1.0.2")
