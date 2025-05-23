@@ -1,0 +1,97 @@
+#!/bin/bash
+
+# Colors for better readability
+BLUE='\033[0;34m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+RED='\033[0;31m'
+NC='\033[0m' # No Color
+
+# Emojis for better readability
+ROCKET="🚀"
+PLANE="✈️"
+PROCESSING="🔄"
+GLOBE="🌐"
+DASHBOARD="📊"
+CHECK="✅"
+WARN="⚠️"
+ERROR="❌"
+
+echo -e "${BLUE}${ROCKET} Flight Control Center Demo${NC}"
+echo -e "${YELLOW}This script will start all components of the Flight Control Center demo.${NC}"
+echo -e "${YELLOW}Make sure you have Docker, Java, and Node.js installed.${NC}"
+echo
+
+# Check if Docker is running
+if ! docker info > /dev/null 2>&1; then
+  echo -e "${RED}${ERROR} Docker is not running. Please start Docker and try again.${NC}"
+  exit 1
+fi
+
+# Function to check if a port is in use
+is_port_in_use() {
+  lsof -i :$1 > /dev/null 2>&1
+  return $?
+}
+
+# Check if ports are available
+if is_port_in_use 9092 || is_port_in_use 29092 || is_port_in_use 5432 || is_port_in_use 8090 || is_port_in_use 9000; then
+  echo -e "${YELLOW}${WARN} Some required ports are already in use. This might cause conflicts.${NC}"
+  echo -e "${YELLOW}Required ports: 9092, 29092 (Kafka), 5432 (PostgreSQL), 8090 (API), 9000 (Dashboard)${NC}"
+  read -p "Do you want to continue anyway? (y/n) " -n 1 -r
+  echo
+  if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+    echo -e "${RED}${ERROR} Demo startup aborted.${NC}"
+    exit 1
+  fi
+fi
+
+# Start infrastructure
+echo -e "${BLUE}${ROCKET} Step 1: Starting infrastructure (Kafka, PostgreSQL)...${NC}"
+cd "$(dirname "$0")/.." || exit
+make start
+
+# Wait for infrastructure to be ready
+echo -e "${YELLOW}⏳ Waiting for infrastructure to be ready...${NC}"
+sleep 10
+
+# Start Flink processor in the background
+echo -e "${BLUE}${PROCESSING} Step 2: Starting Flink processor...${NC}"
+make run-processor &
+PROCESSOR_PID=$!
+echo -e "${GREEN}${CHECK} Flink processor started with PID: $PROCESSOR_PID${NC}"
+sleep 5
+
+# Start Ktor API in the background
+echo -e "${BLUE}${GLOBE} Step 3: Starting Ktor API...${NC}"
+make run-api &
+API_PID=$!
+echo -e "${GREEN}${CHECK} Ktor API started with PID: $API_PID${NC}"
+sleep 5
+
+# Start frontend in the background
+echo -e "${BLUE}${DASHBOARD} Step 4: Starting Dashboard...${NC}"
+cd frontend || exit
+npm install
+npm start &
+FRONTEND_PID=$!
+cd .. || exit
+echo -e "${GREEN}${CHECK} Dashboard started with PID: $FRONTEND_PID${NC}"
+sleep 5
+
+# Start flight simulator
+echo -e "${BLUE}${PLANE} Step 5: Starting Flight Simulator...${NC}"
+make run-simulator &
+SIMULATOR_PID=$!
+echo -e "${GREEN}${CHECK} Flight Simulator started with PID: $SIMULATOR_PID${NC}"
+
+echo
+echo -e "${GREEN}${CHECK} All components started successfully!${NC}"
+echo -e "${BLUE}${DASHBOARD} Dashboard URL: ${GREEN}http://localhost:9000${NC}"
+echo -e "${BLUE}${GLOBE} API URL: ${GREEN}http://localhost:8090${NC}"
+echo
+echo -e "${YELLOW}Press Ctrl+C to stop all components${NC}"
+
+# Wait for user to press Ctrl+C
+trap 'echo -e "${YELLOW}Stopping all components...${NC}"; kill $PROCESSOR_PID $API_PID $FRONTEND_PID $SIMULATOR_PID 2>/dev/null; make stop; echo -e "${GREEN}${CHECK} Demo stopped${NC}"; exit 0' INT
+wait

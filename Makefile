@@ -5,7 +5,7 @@ YELLOW=\033[0;33m
 RED=\033[0;31m
 NC=\033[0m # No Color
 
-.PHONY: setup start stop clean build run-simulator run-processor run-api demo status help
+.PHONY: setup start stop clean build run-simulator run-processor run-api run-frontend install-frontend build-frontend demo status help
 
 # Setup development environment
 setup: ## 🚀 Setup development environment
@@ -60,15 +60,7 @@ run-api: ## 🌐 Run Ktor API
 # Run demo
 demo: ## 🎮 Run complete demo
 	@echo "${BLUE}🎮 Running complete demo...${NC}"
-	@echo "${YELLOW}Step 1: Starting services...${NC}"
-	@make start
-	@echo "${YELLOW}Step 2: Running processor...${NC}"
-	@./gradlew :processor:run &
-	@echo "${YELLOW}Step 3: Running API...${NC}"
-	@./gradlew :api:run &
-	@echo "${YELLOW}Step 4: Running simulator...${NC}"
-	@./gradlew :simulator:run
-	@echo "${GREEN}✅ Demo running!${NC}"
+	@./scripts/demo.sh
 
 # Show status
 status: ## 📊 Show status of all components
@@ -81,6 +73,24 @@ status: ## 📊 Show status of all components
 help: ## 📚 Show this help
 	@echo "${BLUE}📚 Available commands:${NC}"
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "${YELLOW}%-20s${NC} %s\n", $$1, $$2}'
+
+# Install frontend dependencies
+install-frontend: ## 📦 Install frontend dependencies
+	@echo "${BLUE}📦 Installing frontend dependencies...${NC}"
+	@cd frontend && npm install
+	@echo "${GREEN}✅ Frontend dependencies installed!${NC}"
+
+# Build frontend
+build-frontend: ## 🔨 Build frontend
+	@echo "${BLUE}🔨 Building frontend...${NC}"
+	@cd frontend && npm run build
+	@echo "${GREEN}✅ Frontend built!${NC}"
+
+# Run frontend development server
+run-frontend: ## 🌐 Run frontend development server
+	@echo "${BLUE}🌐 Running frontend development server...${NC}"
+	@cd frontend && npm start
+	@echo "${GREEN}✅ Frontend server started!${NC}"
 
 # Default target
 .DEFAULT_GOAL := help

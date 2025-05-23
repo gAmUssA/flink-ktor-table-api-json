@@ -7,7 +7,7 @@ import io.ktor.server.routing.*
 import io.ktor.server.websocket.*
 import io.ktor.websocket.*
 import kotlinx.coroutines.channels.consumeEach
-import org.slf4j.LoggerFactory
+import io.github.oshai.kotlinlogging.KotlinLogging
 import java.time.Duration
 import java.time.Instant
 
@@ -15,7 +15,7 @@ import java.time.Instant
  * Configure routing for the Flight Control Center API.
  */
 fun Application.configureRouting() {
-    val logger = LoggerFactory.getLogger("Routing")
+    val logger = KotlinLogging.logger {}
     
     routing {
         // Health check endpoint
@@ -62,40 +62,52 @@ fun Application.configureRouting() {
             
             // WebSocket for live flight updates
             webSocket("/flights/live") {
-                logger.info("WebSocket connection established")
+                logger.info { "WebSocket connection established" }
                 
                 try {
-                    // This is a placeholder for the actual implementation
                     // In a real implementation, this would subscribe to Kafka and forward messages
-                    for (i in 1..5) {
+                    // For now, we'll simulate real-time flight data
+                    val airlines = listOf("Lufthansa", "British Airways", "Air France", "KLM", "Emirates")
+                    val origins = listOf("FRA", "LHR", "CDG", "AMS", "DXB")
+                    val destinations = listOf("JFK", "LAX", "SFO", "ORD", "MIA")
+                    val eventTypes = listOf("POSITION_UPDATE", "TAKEOFF", "LANDING", "DELAY_UPDATE")
+                    val random = java.util.Random()
+                    
+                    // Keep the connection open and send continuous updates
+                    while (true) {
+                        val flightId = "${airlines[random.nextInt(airlines.size)].take(2)}${100 + random.nextInt(900)}"
+                        val airline = airlines[random.nextInt(airlines.size)]
+                        val eventType = eventTypes[random.nextInt(eventTypes.size)]
+                        val origin = origins[random.nextInt(origins.size)]
+                        val destination = destinations[random.nextInt(destinations.size)]
+                        
+                        // Generate random coordinates centered around Europe
+                        val latitude = 50.0 + random.nextDouble(-10.0, 10.0)
+                        val longitude = 8.0 + random.nextDouble(-15.0, 15.0)
+                        val delayMinutes = if (random.nextDouble() < 0.3) random.nextInt(5, 60) else 0
+                        
                         val message = """
                             {
-                                "flightId": "LH${100 + i}",
-                                "airline": "Lufthansa",
-                                "eventType": "POSITION_UPDATE",
+                                "flightId": "$flightId",
+                                "airline": "$airline",
+                                "eventType": "$eventType",
                                 "timestamp": "${Instant.now()}",
-                                "latitude": ${50.0 + i * 0.1},
-                                "longitude": ${8.0 + i * 0.1},
-                                "delayMinutes": ${i * 5},
-                                "origin": "FRA",
-                                "destination": "JFK"
+                                "latitude": $latitude,
+                                "longitude": $longitude,
+                                "delayMinutes": $delayMinutes,
+                                "origin": "$origin",
+                                "destination": "$destination"
                             }
                         """.trimIndent()
                         
                         send(Frame.Text(message))
-                        kotlinx.coroutines.delay(1000)
+                        kotlinx.coroutines.delay(1000) // Send update every second
                     }
                     
-                    // Listen for incoming messages (client to server)
-                    incoming.consumeEach { frame ->
-                        if (frame is Frame.Text) {
-                            logger.info("Received message: ${frame.readText()}")
-                        }
-                    }
                 } catch (e: Exception) {
-                    logger.error("Error in WebSocket", e)
+                    logger.error(e) { "Error in WebSocket" }
                 } finally {
-                    logger.info("WebSocket connection closed")
+                    logger.info { "WebSocket connection closed" }
                 }
             }
         }

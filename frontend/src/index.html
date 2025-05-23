@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flight Control Center</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin=""/>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;500;600&display=swap">
+</head>
+<body>
+    <div class="app-container">
+        <header class="app-header">
+            <div class="logo">
+                <h1>Flight Control Center</h1>
+            </div>
+            <div class="header-controls">
+                <div class="time-display" id="current-time"></div>
+            </div>
+        </header>
+        
+        <main class="dashboard">
+            <section class="hero-map-container">
+                <div class="section-header">
+                    <h2>Live Flight Map</h2>
+                    <div class="controls">
+                        <button class="control-btn" id="zoom-in">+</button>
+                        <button class="control-btn" id="zoom-out">-</button>
+                        <button class="control-btn" id="center-map">⌖</button>
+                    </div>
+                </div>
+                <div id="map" class="hero-map"></div>
+            </section>
+            
+            <section class="metrics-container">
+                <div class="metrics-card" id="total-flights">
+                    <h3>Active Flights</h3>
+                    <div class="metric-value">0</div>
+                    <div class="metric-trend up">+0% from average</div>
+                </div>
+                <div class="metrics-card" id="delayed-flights">
+                    <h3>Delayed Flights</h3>
+                    <div class="metric-value">0</div>
+                    <div class="metric-trend down">-0% from average</div>
+                </div>
+                <div class="metrics-card" id="density-hotspots">
+                    <h3>Density Hotspots</h3>
+                    <div class="metric-value">0</div>
+                    <div class="metric-trend neutral">0% change</div>
+                </div>
+            </section>
+            
+            <section class="alerts-container">
+                <div class="section-header">
+                    <h2>Live Alerts</h2>
+                    <div class="controls">
+                        <button class="control-btn" id="clear-alerts">Clear All</button>
+                    </div>
+                </div>
+                <div id="alerts-feed" class="alerts-feed"></div>
+            </section>
+        </main>
+        
+        <footer class="app-footer">
+            <div class="status-indicator">
+                <span class="status-dot online"></span>
+                <span class="status-text">Connected</span>
+            </div>
+            <div class="footer-info">
+                Flight Control Center Demo | Apache Flink + Kafka + Ktor
+            </div>
+        </footer>
+    </div>
+</body>
+</html>

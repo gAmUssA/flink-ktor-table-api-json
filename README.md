@@ -63,6 +63,10 @@ flink-ktor-table-api-json/
 │           ├── routes/               # API route definitions
 │           ├── models/               # Data models for API responses
 │           └── services/             # Database interaction services
+├── frontend/                         # Web Dashboard module
+│   ├── package.json
+│   └── src/
+│       └── index.html
 └── Makefile                          # Makefile for common operations
 ```
 
@@ -73,6 +77,7 @@ flink-ktor-table-api-json/
 - Docker and Docker Compose
 - JDK 17 or higher
 - Gradle 8.0 or higher
+- Node.js and npm (for the dashboard)
 
 ### Setup
 
@@ -107,6 +112,17 @@ make run-api
 
 # Run the flight simulator
 make run-simulator
+
+# Run the frontend dashboard
+make run-frontend
+```
+
+### Dashboard Access
+
+Once all components are running, access the dashboard at:
+
+```
+http://localhost:9000
 ```
 
 ### API Endpoints

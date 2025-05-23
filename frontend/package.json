@@ -1,0 +1,36 @@
+{
+  "name": "flight-control-dashboard",
+  "version": "1.0.0",
+  "description": "Flight Control Center Dashboard with premium iOS/macOS aesthetic",
+  "main": "index.js",
+  "scripts": {
+    "start": "webpack serve --mode development --open",
+    "build": "webpack --mode production",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "flight",
+    "dashboard",
+    "real-time",
+    "flink",
+    "kafka"
+  ],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/leaflet": "^1.9.8",
+    "@types/node": "^20.10.5",
+    "css-loader": "^6.8.1",
+    "html-webpack-plugin": "^5.5.4",
+    "style-loader": "^3.3.3",
+    "ts-loader": "^9.5.1",
+    "typescript": "^5.3.3",
+    "webpack": "^5.89.0",
+    "webpack-cli": "^5.1.4",
+    "webpack-dev-server": "^4.15.1"
+  },
+  "dependencies": {
+    "chart.js": "^4.4.1",
+    "leaflet": "^1.9.4"
+  }
+}
