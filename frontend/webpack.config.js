@@ -64,10 +64,9 @@ module.exports = {
     compress: true,
     port: 9000,
     proxy: {
-      '/api': 'http://localhost:8090',
-      '/ws': {
-        target: 'ws://localhost:8090',
-        ws: true,
+      '/api': {
+        target: 'http://localhost:8090',
+        ws: true, // Enable WebSocket proxying for /api paths
       },
     },
   },

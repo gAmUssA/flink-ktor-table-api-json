@@ -1,5 +1,6 @@
 package com.demo.flight.api.routes
 
+import com.demo.flight.api.services.FlightEventService
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.response.*
@@ -7,15 +8,41 @@ import io.ktor.server.routing.*
 import io.ktor.server.websocket.*
 import io.ktor.websocket.*
 import kotlinx.coroutines.channels.consumeEach
+import kotlinx.coroutines.flow.collectLatest
 import io.github.oshai.kotlinlogging.KotlinLogging
 import java.time.Duration
 import java.time.Instant
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 
 /**
  * Configure routing for the Flight Control Center API.
  */
 fun Application.configureRouting() {
     val logger = KotlinLogging.logger {}
+    
+    // Create and start the flight event service
+    val flightEventService = FlightEventService(
+        bootstrapServers = System.getenv("KAFKA_BOOTSTRAP_SERVERS") ?: "localhost:29092",
+        topic = System.getenv("KAFKA_TOPIC") ?: "flight-events",
+        groupId = System.getenv("KAFKA_GROUP_ID") ?: "api-server"
+    )
+    flightEventService.start()
+    
+    // Register shutdown hook to stop the service when the application stops
+    environment.monitor.subscribe(ApplicationStopping) {
+        logger.info { "Stopping FlightEventService due to application shutdown" }
+        flightEventService.stop()
+    }
+    
+    // Create JSON mapper for serializing events
+    val objectMapper = ObjectMapper().apply {
+        registerKotlinModule()
+        registerModule(JavaTimeModule())
+        disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+    }
     
     routing {
         // Health check endpoint
@@ -62,52 +89,24 @@ fun Application.configureRouting() {
             
             // WebSocket for live flight updates
             webSocket("/flights/live") {
-                logger.info { "WebSocket connection established" }
+                val clientAddress = call.request.local.remoteHost
+                logger.info { "WebSocket connection established from $clientAddress" }
                 
                 try {
-                    // In a real implementation, this would subscribe to Kafka and forward messages
-                    // For now, we'll simulate real-time flight data
-                    val airlines = listOf("Lufthansa", "British Airways", "Air France", "KLM", "Emirates")
-                    val origins = listOf("FRA", "LHR", "CDG", "AMS", "DXB")
-                    val destinations = listOf("JFK", "LAX", "SFO", "ORD", "MIA")
-                    val eventTypes = listOf("POSITION_UPDATE", "TAKEOFF", "LANDING", "DELAY_UPDATE")
-                    val random = java.util.Random()
-                    
-                    // Keep the connection open and send continuous updates
-                    while (true) {
-                        val flightId = "${airlines[random.nextInt(airlines.size)].take(2)}${100 + random.nextInt(900)}"
-                        val airline = airlines[random.nextInt(airlines.size)]
-                        val eventType = eventTypes[random.nextInt(eventTypes.size)]
-                        val origin = origins[random.nextInt(origins.size)]
-                        val destination = destinations[random.nextInt(destinations.size)]
-                        
-                        // Generate random coordinates centered around Europe
-                        val latitude = 50.0 + random.nextDouble(-10.0, 10.0)
-                        val longitude = 8.0 + random.nextDouble(-15.0, 15.0)
-                        val delayMinutes = if (random.nextDouble() < 0.3) random.nextInt(5, 60) else 0
-                        
-                        val message = """
-                            {
-                                "flightId": "$flightId",
-                                "airline": "$airline",
-                                "eventType": "$eventType",
-                                "timestamp": "${Instant.now()}",
-                                "latitude": $latitude,
-                                "longitude": $longitude,
-                                "delayMinutes": $delayMinutes,
-                                "origin": "$origin",
-                                "destination": "$destination"
-                            }
-                        """.trimIndent()
-                        
-                        send(Frame.Text(message))
-                        kotlinx.coroutines.delay(1000) // Send update every second
+                    // Collect flight events from the service and send them to the client
+                    flightEventService.flightEvents.collectLatest { event ->
+                        try {
+                            // Serialize the event to JSON
+                            val json = objectMapper.writeValueAsString(event)
+                            send(Frame.Text(json))
+                        } catch (e: Exception) {
+                            logger.error(e) { "Error sending event to WebSocket" }
+                        }
                     }
-                    
                 } catch (e: Exception) {
-                    logger.error(e) { "Error in WebSocket" }
+                    logger.error(e) { "Error in WebSocket connection" }
                 } finally {
-                    logger.info { "WebSocket connection closed" }
+                    logger.info { "WebSocket connection closed from $clientAddress" }
                 }
             }
         }
