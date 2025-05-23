@@ -1,4 +1,5 @@
 import { FlightEvent } from '../../models/FlightEvent';
+import { DASHBOARD_CONFIG } from '../../config';
 
 interface MetricsState {
   activeFlights: Set<string>;

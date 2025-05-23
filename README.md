@@ -125,6 +125,31 @@ Once all components are running, access the dashboard at:
 http://localhost:9000
 ```
 
+### Environment Configuration
+
+The frontend dashboard can be configured using environment variables. Create a `.env` file in the `frontend` directory with the following variables:
+
+```
+# API Configuration
+REACT_APP_API_BASE_URL=http://localhost:8090
+REACT_APP_WS_FLIGHTS_LIVE=/api/flights/live
+REACT_APP_API_FLIGHTS_DENSITY=/api/flights/density
+REACT_APP_API_FLIGHTS_DELAYED=/api/flights/delayed
+
+# Dashboard Configuration
+REACT_APP_UPDATE_INTERVAL=1000
+REACT_APP_MAX_ALERTS=20
+REACT_APP_MAP_CENTER_LAT=50.0
+REACT_APP_MAP_CENTER_LNG=10.0
+REACT_APP_MAP_ZOOM=5
+```
+
+You can also copy the provided `.env.example` file as a starting point:
+
+```bash
+cp frontend/.env.example frontend/.env
+```
+
 ### API Endpoints
 
 - `GET /api/flights/density` - Get current flight density data

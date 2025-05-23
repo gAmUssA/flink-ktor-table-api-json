@@ -1,4 +1,5 @@
 import { FlightEvent } from '../models/FlightEvent';
+import { API_CONFIG } from '../config';
 
 /**
  * Sets up a WebSocket connection to the backend API for real-time flight data
@@ -20,8 +21,11 @@ export function setupWebSocket(onMessage: (event: FlightEvent) => void) {
     
     // Create new WebSocket connection
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    // Point directly to the API server running on localhost:8090
-    const wsUrl = `${protocol}//localhost:8090/api/flights/live`;
+    
+    // Use configurable API base URL and endpoint from config
+    const baseUrl = API_CONFIG.BASE_URL.replace(/^http/, 'ws');
+    const endpoint = API_CONFIG.WS.FLIGHTS_LIVE;
+    const wsUrl = `${baseUrl}${endpoint}`;
     
     console.log(`Connecting to WebSocket at ${wsUrl}`);
     socket = new WebSocket(wsUrl);

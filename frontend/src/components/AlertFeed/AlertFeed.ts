@@ -1,4 +1,5 @@
 import { AlertItem } from '../../models/FlightEvent';
+import { DASHBOARD_CONFIG } from '../../config';
 
 /**
  * Initializes the alert feed component for displaying flight alerts
@@ -16,8 +17,8 @@ export function initAlertFeed(elementId: string) {
     };
   }
   
-  // Maximum number of alerts to display
-  const maxAlerts = 20;
+  // Maximum number of alerts to display from configuration
+  const maxAlerts = DASHBOARD_CONFIG.MAX_ALERTS;
   
   // Array to store alerts
   const alerts: AlertItem[] = [];

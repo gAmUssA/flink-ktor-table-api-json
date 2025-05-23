@@ -1,5 +1,6 @@
 import * as L from 'leaflet';
 import { FlightEvent } from '../../models/FlightEvent';
+import { DASHBOARD_CONFIG } from '../../config';
 
 interface FlightMarker {
   marker: L.Marker;
@@ -18,8 +19,8 @@ export function initMap(elementId: string) {
   
   // Create map instance
   const map = L.map(elementId, {
-    center: [50.0, 10.0], // Center on Europe
-    zoom: 5,
+    center: [DASHBOARD_CONFIG.MAP_CENTER.LAT, DASHBOARD_CONFIG.MAP_CENTER.LNG], // Use configurable center
+    zoom: DASHBOARD_CONFIG.MAP_ZOOM,
     zoomControl: false, // We'll use our custom controls
   });
   
