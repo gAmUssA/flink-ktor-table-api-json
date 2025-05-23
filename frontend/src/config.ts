@@ -32,7 +32,7 @@ export const DASHBOARD_CONFIG = {
   UPDATE_INTERVAL: parseInt(process.env.REACT_APP_UPDATE_INTERVAL || '1000', 10),
   
   // Maximum number of alerts to display
-  MAX_ALERTS: parseInt(process.env.REACT_APP_MAX_ALERTS || '20', 10),
+  MAX_ALERTS: parseInt(process.env.REACT_APP_MAX_ALERTS || '10', 10),
   
   // Initial map center coordinates
   MAP_CENTER: {

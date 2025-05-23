@@ -5,7 +5,7 @@ YELLOW=\033[0;33m
 RED=\033[0;31m
 NC=\033[0m # No Color
 
-.PHONY: setup start stop clean build run-simulator run-processor run-api run-frontend install-frontend build-frontend demo status help
+.PHONY: setup start stop clean build run-simulator run-processor run-api run-frontend install-frontend build-frontend demo status help run-all destroy-all generate-docs
 
 # Setup development environment
 setup: ## 🚀 Setup development environment
@@ -103,6 +103,47 @@ run-frontend: ## 🌐 Run frontend development server
 	@echo "${BLUE}🌐 Running frontend development server...${NC}"
 	@cd frontend && npm start
 	@echo "${GREEN}✅ Frontend server started!${NC}"
+
+# Run all components (API, frontend, and Flink jobs)
+run-all: ## 🚀 Run complete application (API, frontend, and Flink jobs)
+	@echo "${BLUE}🚀 Starting complete application...${NC}"
+	@echo "${YELLOW}⏳ Starting Docker services...${NC}"
+	@docker-compose -f docker/docker-compose.yaml up -d
+	@echo "${YELLOW}⏳ Waiting for services to be ready...${NC}"
+	@sleep 5
+	@echo "${YELLOW}⏳ Starting Flink density aggregation job...${NC}"
+	@./gradlew :processor:run --args="density" &
+	@echo "${YELLOW}⏳ Starting Flink delay detection job...${NC}"
+	@./gradlew :processor:run --args="delay" &
+	@echo "${YELLOW}⏳ Starting Ktor API...${NC}"
+	@./gradlew :api:run &
+	@echo "${YELLOW}⏳ Starting frontend development server...${NC}"
+	@cd frontend && npm start
+	@echo "${GREEN}✅ All components started!${NC}"
+
+# Destroy all components and clean up everything
+destroy-all: ## 💥 Stop and clean up all components of the application
+	@echo "${RED}💥 Destroying all components...${NC}"
+	@echo "${YELLOW}⏳ Stopping all running processes...${NC}"
+	@pkill -f "gradle" || true
+	@pkill -f "npm start" || true
+	@echo "${YELLOW}⏳ Cleaning Docker containers and volumes...${NC}"
+	@docker-compose -f docker/docker-compose.yaml down -v
+	@echo "${YELLOW}⏳ Removing temporary files...${NC}"
+	@./gradlew clean
+	@rm -rf frontend/node_modules frontend/build || true
+	@echo "${GREEN}✅ All components destroyed and cleaned up!${NC}"
+
+# Generate project documentation
+generate-docs: ## 📚 Generate and update project documentation
+	@echo "${BLUE}📚 Generating project documentation...${NC}"
+	@mkdir -p docs/api
+	@echo "${YELLOW}⏳ Generating API documentation...${NC}"
+	@./gradlew :api:dokkaHtml || echo "${RED}⚠️ Dokka HTML generation failed, but continuing...${NC}"
+	@cp -r api/build/dokka/html/* docs/api/ 2>/dev/null || echo "${YELLOW}⚠️ No API docs to copy${NC}"
+	@echo "${YELLOW}⏳ Updating project status document...${NC}"
+	@echo "Last updated: $(shell date)" >> docs/PROJECT_STATUS.md
+	@echo "${GREEN}✅ Documentation generated successfully!${NC}"
 
 # Default target
 .DEFAULT_GOAL := help

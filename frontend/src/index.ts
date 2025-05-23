@@ -3,7 +3,10 @@ import { initMap } from './components/Map/Map';
 import { initMetricsCards } from './components/MetricsCard/MetricsCards';
 import { initAlertFeed } from './components/AlertFeed/AlertFeed';
 import { setupWebSocket } from './services/WebSocketService';
+import { apiService } from './services/ApiService';
+import { convertDelayedFlightsToAlerts, createDelayedFlightsPanel } from './components/AlertFeed/DelayedFlights';
 import { FlightEvent } from './models/FlightEvent';
+import { DASHBOARD_CONFIG } from './config';
 
 // Initialize the dashboard components
 document.addEventListener('DOMContentLoaded', () => {
@@ -17,6 +20,9 @@ document.addEventListener('DOMContentLoaded', () => {
   
   // Initialize alert feed
   const alertFeed = initAlertFeed('alerts-feed');
+  
+  // Create delayed flights panel element
+  const delayedFlightsContainer = document.getElementById('delayed-flights-container');
   
   // Setup WebSocket connection
   const ws = setupWebSocket((event: FlightEvent) => {
@@ -104,6 +110,59 @@ document.addEventListener('DOMContentLoaded', () => {
   if (clearAlertsBtn) {
     clearAlertsBtn.addEventListener('click', () => alertFeed.clearAlerts());
   }
+  
+  // Function to fetch and update flight density data
+  const updateFlightDensity = async () => {
+    try {
+      const densityResponse = await apiService.getFlightDensity();
+      if (densityResponse && densityResponse.data) {
+        // Update map with density data
+        map.updateFlightDensity(densityResponse.data);
+        
+        // Update metrics with density data
+        const totalFlights = densityResponse.data.reduce((sum, item) => sum + item.flight_count, 0);
+        metricsCards.updateFlightCount(totalFlights);
+        
+        console.log(`Updated flight density data: ${densityResponse.data.length} grid cells`);
+      }
+    } catch (error) {
+      console.error('Error fetching flight density data:', error);
+    }
+  };
+  
+  // Function to fetch and update delayed flights data
+  const updateDelayedFlights = async () => {
+    try {
+      const delayedResponse = await apiService.getDelayedFlights();
+      if (delayedResponse && delayedResponse.data) {
+        // Convert delayed flights to alerts
+        const alerts = convertDelayedFlightsToAlerts(delayedResponse.data);
+        
+        // Add alerts to the feed
+        alerts.forEach(alert => alertFeed.addAlert(alert));
+        
+        // Update delayed flights panel if it exists
+        if (delayedFlightsContainer) {
+          delayedFlightsContainer.innerHTML = createDelayedFlightsPanel(delayedResponse.data);
+        }
+        
+        // Update metrics with delayed flights count
+        metricsCards.updateDelayedCount(delayedResponse.data.length);
+        
+        console.log(`Updated delayed flights data: ${delayedResponse.data.length} flights`);
+      }
+    } catch (error) {
+      console.error('Error fetching delayed flights data:', error);
+    }
+  };
+  
+  // Initial data fetch
+  updateFlightDensity();
+  updateDelayedFlights();
+  
+  // Set up periodic updates
+  setInterval(updateFlightDensity, DASHBOARD_CONFIG.UPDATE_INTERVAL * 5); // Less frequent updates for density
+  setInterval(updateDelayedFlights, DASHBOARD_CONFIG.UPDATE_INTERVAL * 3); // More frequent updates for delays
   
   console.log('Flight Control Dashboard initialized successfully');
 });

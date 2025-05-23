@@ -141,6 +141,40 @@ export function initMetricsCards() {
     },
     
     /**
+     * Updates the total flight count directly (for API data)
+     * @param count The new flight count
+     */
+    updateFlightCount: (count: number) => {
+      // Clear existing flights and add the specified count
+      state.activeFlights.clear();
+      
+      // Add dummy flight IDs to match the count
+      for (let i = 0; i < count; i++) {
+        state.activeFlights.add(`api-flight-${i}`);
+      }
+      
+      // Update the UI
+      updateUI();
+    },
+    
+    /**
+     * Updates the delayed flight count directly (for API data)
+     * @param count The new delayed flight count
+     */
+    updateDelayedCount: (count: number) => {
+      // Clear existing delayed flights and add the specified count
+      state.delayedFlights.clear();
+      
+      // Add dummy flight IDs to match the count
+      for (let i = 0; i < count; i++) {
+        state.delayedFlights.add(`api-delayed-${i}`);
+      }
+      
+      // Update the UI
+      updateUI();
+    },
+    
+    /**
      * Gets the current metrics state
      * @returns Current metrics state
      */

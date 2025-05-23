@@ -1,11 +1,17 @@
 import * as L from 'leaflet';
 import { FlightEvent } from '../../models/FlightEvent';
 import { DASHBOARD_CONFIG } from '../../config';
+import { FlightDensity } from '../../services/ApiService';
 
 interface FlightMarker {
   marker: L.Marker;
   lastUpdate: Date;
   flightId: string;
+}
+
+interface DensityLayer {
+  layer: L.Layer;
+  timestamp: Date;
 }
 
 /**
@@ -16,6 +22,9 @@ interface FlightMarker {
 export function initMap(elementId: string) {
   // Flight markers collection
   const flightMarkers: Record<string, FlightMarker> = {};
+  
+  // Density layer reference
+  let densityLayer: DensityLayer | null = null;
   
   // Create map instance with default center from config
   const map = L.map(elementId, {
@@ -196,6 +205,46 @@ export function initMap(elementId: string) {
           [DASHBOARD_CONFIG.MAP_CENTER.LAT, DASHBOARD_CONFIG.MAP_CENTER.LNG], 
           DASHBOARD_CONFIG.MAP_ZOOM
         );
+      }
+    },
+    
+    /**
+     * Updates the flight density heatmap on the map
+     * @param densityData Array of flight density data points
+     */
+    updateFlightDensity: (densityData: FlightDensity[]) => {
+      // Remove existing density layer if it exists
+      if (densityLayer) {
+        map.removeLayer(densityLayer.layer);
+      }
+      
+      // Create heatmap data points from density data
+      const heatmapPoints = densityData.map(point => {
+        // Convert grid coordinates to actual lat/lon
+        // Using a simple conversion for demonstration
+        return [
+          point.grid_lat, 
+          point.grid_lon, 
+          point.flight_count * 5 // Multiply by 5 to make the heatmap more visible
+        ];
+      });
+      
+      // Create new heatmap layer
+      if (heatmapPoints.length > 0) {
+        // @ts-ignore - Leaflet heatmap plugin type definition issue
+        const heatLayer = L.heatLayer(heatmapPoints, {
+          radius: 25,
+          blur: 15,
+          maxZoom: 10,
+          max: 100,
+          gradient: { 0.4: 'blue', 0.6: 'cyan', 0.7: 'lime', 0.8: 'yellow', 1.0: 'red' }
+        }).addTo(map);
+        
+        // Store reference to the layer
+        densityLayer = {
+          layer: heatLayer,
+          timestamp: new Date()
+        };
       }
     },
     

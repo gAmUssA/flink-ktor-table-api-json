@@ -23,6 +23,12 @@ export function initAlertFeed(elementId: string) {
   // Array to store alerts
   const alerts: AlertItem[] = [];
   
+  // Flag to track if a render update is pending
+  let updatePending = false;
+  
+  // Interval for refreshing the display (2 seconds)
+  const REFRESH_INTERVAL = 2000;
+  
   /**
    * Creates an HTML element for an alert
    * @param alert Alert data
@@ -84,9 +90,23 @@ export function initAlertFeed(elementId: string) {
     // Add alerts in reverse chronological order (newest first)
     alerts
       .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
+      .slice(0, DASHBOARD_CONFIG.MAX_ALERTS) // Ensure we only show the max number of alerts
       .forEach(alert => {
         container.appendChild(createAlertElement(alert));
       });
+    
+    // Reset the update pending flag
+    updatePending = false;
+  };
+  
+  /**
+   * Schedule a render update if one is not already pending
+   */
+  const scheduleUpdate = () => {
+    if (!updatePending) {
+      updatePending = true;
+      setTimeout(renderAlerts, REFRESH_INTERVAL);
+    }
   };
   
   // Return alert feed controller object
@@ -104,31 +124,23 @@ export function initAlertFeed(elementId: string) {
         alerts.pop();
       }
       
-      // Create the alert element
-      const alertElement = createAlertElement(alert);
-      
-      // Add the alert to the container at the top
-      if (container.firstChild) {
-        container.insertBefore(alertElement, container.firstChild);
-      } else {
-        container.appendChild(alertElement);
-      }
+      // Schedule an update to refresh the display
+      scheduleUpdate();
       
       // Play notification sound (if we had one)
       // new Audio('/path/to/notification.mp3').play().catch(e => console.log('Audio play failed:', e));
-      
-      // Remove the alert after a delay (for auto-dismissing alerts)
-      // setTimeout(() => {
-      //   alertElement.style.opacity = '0';
-      //   setTimeout(() => alertElement.remove(), 300);
-      // }, 10000);
     },
     
     /**
      * Clears all alerts from the feed
      */
     clearAlerts: () => {
+      // Clear the alerts array
       alerts.length = 0;
+      
+      // Immediately render the empty state instead of waiting for the next refresh
+      // This provides better user feedback that the clear action worked
+      updatePending = false; // Reset the pending flag
       
       // Animate the removal of alerts
       const alertElements = container.querySelectorAll('.alert-item');

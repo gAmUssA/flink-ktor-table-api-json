@@ -1,5 +1,6 @@
 package com.demo.flight.api.routes
 
+import com.demo.flight.api.services.DatabaseService
 import com.demo.flight.api.services.FlightEventService
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -22,6 +23,9 @@ import com.fasterxml.jackson.module.kotlin.registerKotlinModule
  */
 fun Application.configureRouting() {
     val logger = KotlinLogging.logger {}
+    
+    // Create database service
+    val databaseService = DatabaseService()
     
     // Create and start the flight event service
     val flightEventService = FlightEventService(
@@ -54,37 +58,16 @@ fun Application.configureRouting() {
         route("/api") {
             // Flight density endpoint
             get("/flights/density") {
-                // This is a placeholder for the actual implementation
-                // In a real implementation, this would query the database for flight density data
-                call.respond(
-                    mapOf(
-                        "timestamp" to Instant.now().toString(),
-                        "data" to listOf(
-                            mapOf("grid_lat" to 50.0, "grid_lon" to 8.0, "flight_count" to 5),
-                            mapOf("grid_lat" to 51.0, "grid_lon" to 9.0, "flight_count" to 3)
-                        )
-                    )
-                )
+                logger.info { "Fetching flight density data" }
+                val densityData = databaseService.getCurrentDensity()
+                call.respond(densityData)
             }
             
             // Delayed flights endpoint
             get("/flights/delayed") {
-                // This is a placeholder for the actual implementation
-                // In a real implementation, this would query the database for delayed flights
-                call.respond(
-                    mapOf(
-                        "timestamp" to Instant.now().toString(),
-                        "data" to listOf(
-                            mapOf(
-                                "flightId" to "LH123",
-                                "airline" to "Lufthansa",
-                                "delayMinutes" to 20,
-                                "origin" to "FRA",
-                                "destination" to "JFK"
-                            )
-                        )
-                    )
-                )
+                logger.info { "Fetching delayed flights data" }
+                val delayedFlightsData = databaseService.getDelayedFlights()
+                call.respond(delayedFlightsData)
             }
             
             // WebSocket for live flight updates

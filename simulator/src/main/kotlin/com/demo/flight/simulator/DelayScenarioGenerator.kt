@@ -86,12 +86,12 @@ class DelayScenarioGenerator(
      * Checks for pre-departure delays based on origin airport.
      */
     private fun checkPreDepartureDelay(originAirport: String): Pair<Boolean, Int>? {
-        // Base probability for pre-departure delay
-        var delayProbability = 0.08
+        // Base probability for pre-departure delay - reduced to achieve 10% delayed flights
+        var delayProbability = 0.04
         
-        // Increase probability for congested airports
+        // Increase probability for congested airports - reduced to achieve 10% delayed flights
         if (originAirport in congestedAirports) {
-            delayProbability += 0.07
+            delayProbability += 0.03
         }
         
         // Check time of day at origin airport (rush hours have more delays)
@@ -132,8 +132,8 @@ class DelayScenarioGenerator(
      * Checks for en-route delays based on weather and air traffic.
      */
     private fun checkEnRouteDelay(originAirport: String, destinationAirport: String): Pair<Boolean, Int>? {
-        // En-route delays are less common than pre-departure delays
-        var delayProbability = 0.03
+        // En-route delays are less common than pre-departure delays - reduced to achieve 10% delayed flights
+        var delayProbability = 0.015
         
         // Weather factors from both origin and destination regions
         val originTimeZone = airportTimeZones[originAirport] ?: ZoneId.of("UTC")
@@ -164,12 +164,12 @@ class DelayScenarioGenerator(
      * Checks for arrival delays based on destination airport congestion.
      */
     private fun checkArrivalDelay(destinationAirport: String): Pair<Boolean, Int>? {
-        // Base probability for arrival delay
-        var delayProbability = 0.05
+        // Base probability for arrival delay - reduced to achieve 10% delayed flights
+        var delayProbability = 0.025
         
-        // Increase probability for congested airports
+        // Increase probability for congested airports - reduced to achieve 10% delayed flights
         if (destinationAirport in congestedAirports) {
-            delayProbability += 0.08
+            delayProbability += 0.04
         }
         
         // Check time of day at destination airport

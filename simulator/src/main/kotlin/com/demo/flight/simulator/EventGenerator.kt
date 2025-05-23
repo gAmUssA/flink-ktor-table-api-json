@@ -32,7 +32,8 @@ class EventGenerator(
     // Configurable parameters with defaults
     private val minFlights = config.getProperty("min.flights", "5").toIntOrNull() ?: 5
     private val maxFlights = config.getProperty("max.flights", "20").toIntOrNull() ?: 20
-    private val delayProbability = config.getProperty("delay.probability", "0.05").toDoubleOrNull() ?: 0.05
+    // Reduced delay probability to achieve approximately 10% delayed flights
+    private val delayProbability = config.getProperty("delay.probability", "0.02").toDoubleOrNull() ?: 0.02
     private val cancellationProbability = config.getProperty("cancellation.probability", "0.005").toDoubleOrNull() ?: 0.005
     
     // Delay scenario generator for realistic delays

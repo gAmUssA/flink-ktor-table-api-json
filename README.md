@@ -16,6 +16,15 @@ A simplified real-time flight operations dashboard that demonstrates stream proc
 
 This application showcases Apache Flink's stream processing capabilities with Kafka using simple JSON messages, integrated with Ktor to create a real-time flight operations dashboard. The system processes flight events to detect delays and calculate flight density in real-time.
 
+### Features
+
+- **Real-time Flight Tracking**: Monitor flights with live position updates via WebSockets
+- **Delay Detection**: Identify and track delayed flights (approximately 10% of all flights)
+- **Flight Density Analysis**: Visualize flight density across geographic regions
+- **Interactive Map**: View flights and density data on an interactive map
+- **Live Alerts**: Receive notifications about flight delays and status changes
+- **Metrics Dashboard**: Monitor key statistics about flight operations
+
 ## Architecture
 
 ```
@@ -147,10 +156,23 @@ The implementation uses:
 
 ### Running the Application
 
-To run the complete demo:
+To run the complete application with a single command:
 
 ```bash
-make demo
+make run-all
+```
+
+This will start all components:
+- Docker services (Kafka, PostgreSQL)
+- Flink density aggregation job
+- Flink delay detection job
+- Ktor API server
+- Frontend development server
+
+To clean up and stop all components:
+
+```bash
+make destroy-all
 ```
 
 Or run each component separately:
@@ -170,6 +192,12 @@ make run-simulator
 
 # Run the frontend dashboard
 make run-frontend
+```
+
+You can also run the demo script for a guided demonstration:
+
+```bash
+make demo
 ```
 
 ### Dashboard Access
@@ -193,7 +221,7 @@ REACT_APP_API_FLIGHTS_DELAYED=/api/flights/delayed
 
 # Dashboard Configuration
 REACT_APP_UPDATE_INTERVAL=1000
-REACT_APP_MAX_ALERTS=20
+REACT_APP_MAX_ALERTS=10  # Maximum number of alerts to display
 REACT_APP_MAP_CENTER_LAT=50.0
 REACT_APP_MAP_CENTER_LNG=10.0
 REACT_APP_MAP_ZOOM=5
