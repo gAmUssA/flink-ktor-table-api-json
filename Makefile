@@ -46,10 +46,22 @@ run-simulator: ## ✈️ Run flight simulator
 	@echo "${GREEN}✅ Simulator started!${NC}"
 
 # Run Flink processor
-run-processor: ## 🔄 Run Flink processor
-	@echo "${BLUE}🔄 Running Flink processor...${NC}"
-	@./gradlew :processor:run
-	@echo "${GREEN}✅ Processor started!${NC}"
+run-processor: ## 🔄 Run all Flink processor jobs
+	@echo "${BLUE}🔄 Running all Flink processor jobs...${NC}"
+	@./gradlew :processor:run --args="all"
+	@echo "${GREEN}✅ Flink jobs submitted!${NC}"
+
+# Run Flink delay detection job
+run-delay-job: ## 🕒 Run Flink delay detection job
+	@echo "${BLUE}🕒 Running Flink delay detection job...${NC}"
+	@./gradlew :processor:run --args="delay"
+	@echo "${GREEN}✅ Delay detection job submitted!${NC}"
+
+# Run Flink density aggregation job
+run-density-job: ## 🗺️ Run Flink density aggregation job
+	@echo "${BLUE}🗺️ Running Flink density aggregation job...${NC}"
+	@./gradlew :processor:run --args="density"
+	@echo "${GREEN}✅ Density aggregation job submitted!${NC}"
 
 # Run Ktor API
 run-api: ## 🌐 Run Ktor API
