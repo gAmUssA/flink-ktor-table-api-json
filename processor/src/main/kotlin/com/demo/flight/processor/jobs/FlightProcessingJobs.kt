@@ -25,14 +25,14 @@ object FlightProcessingJobs {
             }
             "density" -> {
                 logger.info { "Running Density Aggregation Job" }
-                // Density job will be implemented in Phase 3
-                logger.info { "Density Aggregation Job not yet implemented" }
+                DensityAggregationJob().execute()
             }
             "all" -> {
                 logger.info { "Running all jobs" }
+                // Note: In a production environment, these would typically be submitted to a Flink cluster
+                // rather than executed sequentially in the same JVM
                 DelayDetectionJob().execute()
-                // Density job will be implemented in Phase 3
-                logger.info { "Density Aggregation Job not yet implemented" }
+                DensityAggregationJob().execute()
             }
             else -> {
                 logger.error { "Unknown job type: $jobType" }

@@ -166,54 +166,58 @@
 ## Phase 6: Integration and Testing
 
 ### 6.1 End-to-End Testing
-97. [ ] Create test environment configuration
-98. [ ] Implement integration tests for data flow
-99. [ ] Test WebSocket real-time updates
-100. [ ] Verify aggregation results accuracy
-101. [ ] Test dashboard responsiveness and animations
+97. [x] Create test environment configuration
+98. [x] Implement integration tests for data flow
+   - [x] Refactor DelayDetectionJobTest for Table API
+   - [x] Refactor DensityAggregationJobTest for Table API
+99. [ ] Implement embedded Kafka and PostgreSQL for integration testing
+100. [ ] Test WebSocket real-time updates
+101. [ ] Verify aggregation results accuracy
+102. [ ] Test dashboard responsiveness and animations
 
 ### 6.2 Performance Testing
-102. [ ] Set up performance testing environment
-103. [ ] Test system with 100+ events per second
-104. [ ] Measure and optimize response times
-105. [ ] Optimize dashboard rendering performance
-106. [ ] Test WebSocket connection stability
-107. [ ] Identify and resolve bottlenecks
+103. [ ] Set up performance testing environment
+104. [ ] Test system with 100+ events per second
+105. [ ] Measure and optimize response times
+106. [ ] Optimize dashboard rendering performance
+107. [ ] Test WebSocket connection stability
+108. [ ] Identify and resolve bottlenecks
 
 ### 6.3 Demo Preparation
-108. [x] Create demo scripts for presentation
-109. [x] Prepare sample scenarios
-110. [ ] Create guided tour of dashboard features
-111. [x] Document demo execution steps
+109. [x] Create demo scripts for presentation
+110. [x] Prepare sample scenarios
+111. [ ] Create guided tour of dashboard features
+112. [x] Document demo execution steps
 
 ### 6.4 Documentation
-112. [x] Create README.md with project overview
-113. [x] Document API endpoints
-114. [x] Add setup and execution instructions
-115. [ ] Create architecture diagram
+113. [x] Create README.md with project overview
+114. [x] Document API endpoints
+115. [x] Add setup and execution instructions
+116. [ ] Create architecture diagram
 
 ## Phase 7: Deployment and Delivery
 
 ### 7.1 Containerization
-116. [ ] Create Dockerfiles for each module
-117. [ ] Configure Docker Compose for complete application
-118. [ ] Optimize container images for size and performance
-119. [ ] Add health checks for containers
+117. [ ] Create Dockerfiles for each module
+118. [ ] Configure Docker Compose for complete application
+119. [ ] Optimize container images for size and performance
+120. [ ] Add health checks for containers
 
 ### 7.2 CI/CD Setup
-120. [ ] Configure GitHub Actions workflow
-121. [ ] Set up automated testing
-122. [ ] Configure build and deployment pipeline
-123. [ ] Add release management
+121. [ ] Configure GitHub Actions workflow
+122. [ ] Set up automated testing
+123. [ ] Configure deployment pipeline
+124. [ ] Add status badges to README.md
 
-### 7.3 Monitoring and Logging
-124. [ ] Configure centralized logging
-125. [ ] Set up metrics collection
-126. [ ] Create monitoring dashboard
-127. [ ] Implement alerting for critical issues
+### 7.3 Deployment
+125. [ ] Deploy to staging environment
+126. [ ] Conduct final testing
+127. [ ] Deploy to production
+128. [ ] Monitor system performance
 
 ### 7.4 Final Delivery
-128. [ ] Verify all success criteria
-129. [ ] Prepare final documentation
-130. [ ] Create presentation materials
+129. [ ] Verify all success criteria
+130. [ ] Prepare final documentation
+131. [ ] Create presentation materials
+132. [ ] Conduct final demo rehearsal
 131. [ ] Conduct final demo rehearsal

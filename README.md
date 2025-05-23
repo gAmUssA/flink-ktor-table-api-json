@@ -1,5 +1,15 @@
 # Flight Control Center Demo Application
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Kotlin](https://img.shields.io/badge/Kotlin-1.9.21-blue.svg)](https://kotlinlang.org/)
+[![Gradle](https://img.shields.io/badge/Gradle-Kotlin%20DSL-green.svg)](https://gradle.org/)
+[![Flink](https://img.shields.io/badge/Apache%20Flink-2.0.0-red.svg)](https://flink.apache.org/)
+[![Kafka](https://img.shields.io/badge/Kafka-7.9.0%20%7C%204.0.0-black.svg)](https://kafka.apache.org/)
+[![Ktor](https://img.shields.io/badge/Ktor-2.3.7-purple.svg)](https://ktor.io/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-blue.svg)](https://www.postgresql.org/)
+[![JVM](https://img.shields.io/badge/JVM-21-orange.svg)](https://openjdk.java.net/)
+[![Docker](https://img.shields.io/badge/Docker-Compose-blue.svg)](https://www.docker.com/)
+
 A simplified real-time flight operations dashboard that demonstrates stream processing concepts using Apache Flink with Kafka, integrated with Ktor to create an accessible demo.
 
 ## Project Overview
@@ -51,10 +61,16 @@ flink-ktor-table-api-json/
 │   └── src/main/kotlin/
 │       └── com/demo/flight/processor/
 │           ├── jobs/                 # Flink job definitions
-│           │   ├── DelayDetectionJob.kt
-│           │   └── DensityAggregationJob.kt
+│           │   ├── FlinkJobBase.kt         # Base class for Flink jobs
+│           │   ├── FlightProcessingJobs.kt # Main entry point
+│           │   ├── DelayDetectionJob.kt    # Detects delayed flights
+│           │   └── DensityAggregationJob.kt # Calculates flight density
 │           ├── models/               # Data models for processing
+│           │   └── FlightEvent.kt          # Flight event data model
 │           └── connectors/           # Kafka and PostgreSQL connectors
+│               ├── KafkaSourceConnector.kt # Kafka source implementation
+│               ├── JdbcSinkConnector.kt    # PostgreSQL sink implementation
+│               └── FlightEventDeserializationSchema.kt # JSON deserialization
 ├── api/                              # Ktor REST API module
 │   ├── build.gradle.kts
 │   └── src/main/kotlin/
@@ -89,6 +105,45 @@ make setup
 ```
 
 This will start the required Docker containers (Kafka, PostgreSQL) and initialize the database.
+
+## Flink Stream Processing
+
+The processor module contains two Flink jobs:
+
+1. **DelayDetectionJob**: Processes flight events to detect delayed flights and stores them in PostgreSQL.
+2. **DensityAggregationJob**: Calculates flight density by geographic grid and stores the results in PostgreSQL.
+
+### Running the Flink Jobs
+
+To run the Flink jobs, use the following commands:
+
+```bash
+# Run both jobs
+./gradlew :processor:run
+
+# Run only the delay detection job
+./gradlew :processor:run --args="delay"
+
+# Run only the density aggregation job
+./gradlew :processor:run --args="density"
+```
+
+### Flink Job Architecture
+
+The Flink jobs use the DataStream API to process flight events from Kafka and store the results in PostgreSQL:
+
+```
+┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
+│  Kafka Source   │───▶│ DataStream API   │───▶│   JDBC Sink     │
+│  (Flight Events)│    │ (Transformations)│    │  (PostgreSQL)   │
+└─────────────────┘    └──────────────────┘    └─────────────────┘
+```
+
+The implementation uses:
+- Kafka source connector for consuming flight events
+- JDBC sink connector for writing to PostgreSQL
+- Custom deserialization for JSON messages
+- Event time processing with watermarks
 
 ### Running the Application
 
