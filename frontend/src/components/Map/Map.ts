@@ -17,12 +17,61 @@ export function initMap(elementId: string) {
   // Flight markers collection
   const flightMarkers: Record<string, FlightMarker> = {};
   
-  // Create map instance
+  // Create map instance with default center from config
   const map = L.map(elementId, {
-    center: [DASHBOARD_CONFIG.MAP_CENTER.LAT, DASHBOARD_CONFIG.MAP_CENTER.LNG], // Use configurable center
+    center: [DASHBOARD_CONFIG.MAP_CENTER.LAT, DASHBOARD_CONFIG.MAP_CENTER.LNG],
     zoom: DASHBOARD_CONFIG.MAP_ZOOM,
     zoomControl: false, // We'll use our custom controls
   });
+  
+  // Store user location if available
+  let userLocation: [number, number] | null = null;
+  let userLocationMarker: L.Marker | null = null;
+  
+  // Try to get user's location and center map accordingly
+  if (navigator.geolocation) {
+    console.log('Geolocation is supported, attempting to get user location...');
+    
+    navigator.geolocation.getCurrentPosition(
+      // Success callback
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        console.log(`User location obtained: ${latitude}, ${longitude}`);
+        
+        // Store user location
+        userLocation = [latitude, longitude];
+        
+        // Center map on user's location
+        map.setView(userLocation, DASHBOARD_CONFIG.MAP_ZOOM);
+        
+        // Add a marker for user's location
+        userLocationMarker = L.marker(userLocation, {
+          icon: L.divIcon({
+            className: 'user-location-marker',
+            html: '<div class="pulse"></div>',
+            iconSize: [20, 20],
+            iconAnchor: [10, 10]
+          })
+        })
+        .addTo(map)
+        .bindPopup('Your Location')
+        .openPopup();
+      },
+      // Error callback
+      (error) => {
+        console.warn(`Geolocation error (${error.code}): ${error.message}`);
+        // Fall back to default center from config
+      },
+      // Options
+      {
+        enableHighAccuracy: false, // No need for high accuracy
+        timeout: 5000,            // 5 second timeout
+        maximumAge: 0              // Don't use cached position
+      }
+    );
+  } else {
+    console.log('Geolocation is not supported by this browser, using default map center');
+  }
   
   // Add tile layer (map background)
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -131,10 +180,23 @@ export function initMap(elementId: string) {
     },
     
     /**
-     * Centers the map on Europe
+     * Centers the map on user's location if available, otherwise on default center
      */
     centerMap: () => {
-      map.setView([50.0, 10.0], 5);
+      if (userLocation) {
+        // If user location is available, center on it
+        map.setView(userLocation, DASHBOARD_CONFIG.MAP_ZOOM);
+        // Highlight the user location marker
+        if (userLocationMarker) {
+          userLocationMarker.openPopup();
+        }
+      } else {
+        // Otherwise use the default center from config
+        map.setView(
+          [DASHBOARD_CONFIG.MAP_CENTER.LAT, DASHBOARD_CONFIG.MAP_CENTER.LNG], 
+          DASHBOARD_CONFIG.MAP_ZOOM
+        );
+      }
     },
     
     /**

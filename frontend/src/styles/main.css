@@ -360,6 +360,33 @@ body {
   animation: pulse 1.5s infinite;
 }
 
+/* User location marker */
+.user-location-marker {
+  background: transparent;
+}
+
+.user-location-marker .pulse {
+  position: relative;
+  width: 20px;
+  height: 20px;
+  background-color: var(--color-primary);
+  border-radius: 50%;
+  box-shadow: 0 0 0 rgba(0, 113, 227, 0.4);
+  animation: userLocationPulse 2s infinite;
+}
+
+@keyframes userLocationPulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(0, 113, 227, 0.6);
+  }
+  70% {
+    box-shadow: 0 0 0 15px rgba(0, 113, 227, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(0, 113, 227, 0);
+  }
+}
+
 /* Scrollbar styling */
 ::-webkit-scrollbar {
   width: 8px;
