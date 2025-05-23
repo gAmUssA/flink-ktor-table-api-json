@@ -36,21 +36,21 @@
 21. [x] Create serialization utilities for JSON
 
 ### 2.3 Event Generator
-22. [ ] Implement `EventGenerator` class
-23. [ ] Create flight path generation algorithm
-24. [ ] Implement delay scenario generation
-25. [ ] Add configuration options for simulation parameters
+22. [x] Implement `EventGenerator` class
+23. [x] Create flight path generation algorithm
+24. [x] Implement delay scenario generation
+25. [x] Add configuration options for simulation parameters
 
 ### 2.4 Kafka Integration
-26. [ ] Configure Kafka producer for JSON messages
-27. [ ] Implement error handling and retry logic
-28. [ ] Add metrics collection for event generation
+26. [x] Configure Kafka producer for JSON messages
+27. [x] Implement error handling and retry logic
+28. [x] Add metrics collection for event generation
 
 ### 2.5 Simulator Application
-29. [ ] Create `FlightSimulator` main class
-30. [ ] Implement command-line interface
-31. [ ] Add configuration loading from properties file
-32. [ ] Create simulation scenarios for demo
+29. [x] Create `FlightSimulator` main class
+30. [x] Implement command-line interface
+31. [x] Add configuration loading from properties file
+32. [x] Create simulation scenarios for demo
 
 ## Phase 3: Flink Stream Processing
 
