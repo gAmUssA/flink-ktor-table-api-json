@@ -1,14 +1,15 @@
 package com.demo.flight.processor.jobs
 
-import com.demo.flight.processor.models.EventType
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment
-import java.time.Instant
 
 /**
- * Flink job for detecting delayed flights.
- * Uses the Table API with SQL to process flight events and detect delays.
+ * Flink job for aggregating flight density by geographic grid.
+ * Uses the Table API with SQL to process flight events and calculate density.
  */
-class DelayDetectionJob : FlinkJobBase("delay-detection-job") {
+class DensityAggregationJob : FlinkJobBase("density-aggregation-job") {
+    
+    // Grid size in degrees (approximately 50km at the equator)
+    private val gridSize = 0.5
     
     override fun execute() {
         logger.info { "Starting $jobName" }
@@ -24,12 +25,12 @@ class DelayDetectionJob : FlinkJobBase("delay-detection-job") {
         createKafkaSourceTable(tableEnv)
         
         // Create the PostgreSQL sink table
-        logger.info { "Creating PostgreSQL sink table for delayed flights" }
+        logger.info { "Creating PostgreSQL sink table for flight density" }
         createJdbcSinkTable(tableEnv)
         
-        // Process the flight events to detect delays using SQL
-        logger.info { "Processing flight events to detect delays using SQL" }
-        detectDelayedFlightsWithSql(tableEnv)
+        // Process the flight events to calculate density using SQL
+        logger.info { "Processing flight events to calculate density using SQL" }
+        calculateFlightDensityWithSql(tableEnv)
         
         // Execute the job
         logger.info { "Executing $jobName" }
@@ -64,26 +65,37 @@ class DelayDetectionJob : FlinkJobBase("delay-detection-job") {
                 'format' = 'json'
             )
         """.trimIndent())
+        
+        // Create a view with grid coordinates for easier querying
+        tableEnv.executeSql("""
+            CREATE VIEW flight_events_grid AS
+            SELECT
+                flightId,
+                airline,
+                eventType,
+                timestamp,
+                FLOOR(latitude / $gridSize) * $gridSize AS grid_lat,
+                FLOOR(longitude / $gridSize) * $gridSize AS grid_lon
+            FROM flight_events
+        """.trimIndent())
     }
     
     /**
-     * Create the JDBC sink table for delayed flights.
+     * Create the JDBC sink table for flight density.
      */
     private fun createJdbcSinkTable(tableEnv: StreamTableEnvironment) {
         // Create a JDBC sink table for PostgreSQL
         tableEnv.executeSql("""
-            CREATE TABLE delayed_flights_sink (
-                flight_id STRING,
-                airline STRING,
-                delay_minutes INT,
-                origin STRING,
-                destination STRING,
+            CREATE TABLE flight_density_sink (
+                grid_lat DOUBLE,
+                grid_lon DOUBLE,
+                flight_count INT,
                 event_timestamp TIMESTAMP(3),
-                PRIMARY KEY (flight_id) NOT ENFORCED
+                PRIMARY KEY (grid_lat, grid_lon) NOT ENFORCED
             ) WITH (
                 'connector' = 'jdbc',
                 'url' = 'jdbc:postgresql://localhost:5432/flightdb',
-                'table-name' = 'delayed_flights',
+                'table-name' = 'flight_density',
                 'username' = 'postgres',
                 'password' = 'postgres'
             )
@@ -91,21 +103,19 @@ class DelayDetectionJob : FlinkJobBase("delay-detection-job") {
     }
     
     /**
-     * Process flight events to detect delayed flights using SQL.
+     * Calculate flight density by geographic grid using SQL.
      */
-    private fun detectDelayedFlightsWithSql(tableEnv: StreamTableEnvironment) {
-        // Execute SQL to filter delayed flights and insert into sink
+    private fun calculateFlightDensityWithSql(tableEnv: StreamTableEnvironment) {
+        // Execute SQL to calculate flight density and insert into sink
         tableEnv.executeSql("""
-            INSERT INTO delayed_flights_sink
+            INSERT INTO flight_density_sink
             SELECT
-                flightId AS flight_id,
-                airline,
-                delayMinutes AS delay_minutes,
-                origin,
-                destination,
-                timestamp AS event_timestamp
-            FROM flight_events
-            WHERE eventType = 'DELAY_NOTIFICATION' AND delayMinutes > 0
+                grid_lat,
+                grid_lon,
+                COUNT(*) AS flight_count,
+                MAX(timestamp) AS event_timestamp
+            FROM flight_events_grid
+            GROUP BY grid_lat, grid_lon
         """.trimIndent())
     }
 }
