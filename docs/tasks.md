@@ -65,9 +65,9 @@
 38. [x] Set up logging and metrics collection
 
 ### 3.3 Kafka Source Connector
-39. [ ] Implement Kafka source configuration for JSON messages
-40. [ ] Create deserialization schema for flight events
-41. [ ] Configure watermarks for event time processing
+39. [x] Implement Kafka source configuration for JSON messages
+40. [x] Create deserialization schema for flight events
+41. [x] Configure watermarks for event time processing
 
 ### 3.4 Delay Detection Job
 42. [x] Create `DelayDetectionJob` class
@@ -76,16 +76,16 @@
 45. [x] Add job parameters and configuration options
 
 ### 3.5 Density Aggregation Job
-46. [ ] Create `DensityAggregationJob` class
-47. [ ] Implement windowed aggregation with Table API
-48. [ ] Configure grid-based spatial aggregation
-49. [ ] Set up PostgreSQL sink with upsert capability
+46. [x] Create `DensityAggregationJob` class
+47. [x] Implement windowed aggregation with DataStream API
+48. [x] Configure grid-based spatial aggregation
+49. [x] Set up PostgreSQL sink with upsert capability
 
 ### 3.6 Job Deployment
-50. [ ] Create job submission logic
-51. [ ] Implement configuration loading
-52. [ ] Add job monitoring and metrics
-53. [ ] Create utility for job control
+50. [x] Create job submission logic
+51. [x] Implement configuration loading
+52. [x] Add job monitoring and metrics
+53. [x] Create utility for job control
 
 ## Phase 4: Ktor REST API
 
