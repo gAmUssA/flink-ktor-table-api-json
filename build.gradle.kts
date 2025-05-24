@@ -39,7 +39,7 @@ subprojects {
         implementation("com.zaxxer:HikariCP:5.0.1")
         
         // Logging
-        implementation("org.slf4j:slf4j-api:2.0.9")
+        implementation("org.slf4j:slf4j-api:2.0.17")
         implementation("ch.qos.logback:logback-classic:1.4.11")
         implementation("ch.qos.logback:logback-core:1.4.11")
         implementation("io.github.oshai:kotlin-logging-jvm:5.1.0")
