@@ -2,7 +2,6 @@
 .gradle/
 build/
 gradle-app.setting
-!gradle-wrapper.jar
 .gradletasknamecache
 
 # IntelliJ IDEA
@@ -24,6 +23,7 @@ out/
 
 # Package Files
 *.jar
+!gradle-wrapper.jar
 *.war
 *.nar
 *.ear
