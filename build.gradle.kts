@@ -47,7 +47,7 @@ subprojects {
         // Testing
         testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.0")
         testImplementation("org.junit.jupiter:junit-jupiter-engine:5.10.0")
-        testImplementation("io.mockk:mockk:1.13.8")
+        testImplementation("io.mockk:mockk:1.14.2")
     }
 
     tasks.withType<KotlinCompile> {
