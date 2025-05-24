@@ -36,7 +36,7 @@ subprojects {
         
         // PostgreSQL
         implementation("org.postgresql:postgresql:42.6.0")
-        implementation("com.zaxxer:HikariCP:5.0.1")
+        implementation("com.zaxxer:HikariCP:5.1.0")
         
         // Logging
         implementation("org.slf4j:slf4j-api:2.0.9")
