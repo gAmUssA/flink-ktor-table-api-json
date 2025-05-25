@@ -27,7 +27,7 @@ subprojects {
         implementation(kotlin("reflect"))
         
         // Kafka
-        implementation("org.apache.kafka:kafka-clients:3.5.1")
+        implementation("org.apache.kafka:kafka-clients:3.9.1")
         
         // Jackson for JSON serialization
         implementation("com.fasterxml.jackson.core:jackson-databind:2.15.2")
