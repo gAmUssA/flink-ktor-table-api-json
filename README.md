@@ -1,7 +1,7 @@
 # Flight Control Center Demo Application
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Kotlin](https://img.shields.io/badge/Kotlin-1.9.21-blue.svg)](https://kotlinlang.org/)
+[![Kotlin](https://img.shields.io/badge/Kotlin-2.0.0-blue.svg)](https://kotlinlang.org/)
 [![Gradle](https://img.shields.io/badge/Gradle-Kotlin%20DSL-green.svg)](https://gradle.org/)
 [![Flink](https://img.shields.io/badge/Apache%20Flink-2.0.0-red.svg)](https://flink.apache.org/)
 [![Kafka](https://img.shields.io/badge/Kafka-7.9.0%20%7C%204.0.0-black.svg)](https://kafka.apache.org/)
@@ -42,7 +42,7 @@ This application showcases Apache Flink's stream processing capabilities with Ka
 
 ## Technology Stack
 
-- **Kotlin 1.9+**: Primary programming language
+- **Kotlin 2.0+**: Primary programming language
 - **Gradle (Kotlin DSL)**: Build system
 - **Apache Flink 2.0**: Stream processing framework
 - **Kafka 3.5+**: Message broker (using Confluent images)

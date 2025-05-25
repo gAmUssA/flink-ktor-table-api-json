@@ -3,9 +3,9 @@ package com.demo.flight.simulator
 import com.demo.flight.simulator.models.EventType
 import com.demo.flight.simulator.models.FlightEvent
 import io.github.oshai.kotlinlogging.KotlinLogging
-import java.time.Instant
-import java.util.Properties
 import java.io.FileInputStream
+import java.time.Instant
+import java.util.*
 import kotlin.math.*
 import kotlin.random.Random
 
@@ -17,6 +17,8 @@ class EventGenerator(
     private val random: Random = Random(System.currentTimeMillis()),
     private val configPath: String? = null
 ) {
+    private val logger = KotlinLogging.logger {}
+
     // Configuration properties
     private val config = Properties().apply {
         configPath?.let { path ->
@@ -28,18 +30,18 @@ class EventGenerator(
             }
         }
     }
-    
+
     // Configurable parameters with defaults
     private val minFlights = config.getProperty("min.flights", "5").toIntOrNull() ?: 5
     private val maxFlights = config.getProperty("max.flights", "20").toIntOrNull() ?: 20
+
     // Reduced delay probability to achieve approximately 10% delayed flights
     private val delayProbability = config.getProperty("delay.probability", "0.02").toDoubleOrNull() ?: 0.02
     private val cancellationProbability = config.getProperty("cancellation.probability", "0.005").toDoubleOrNull() ?: 0.005
-    
+
     // Delay scenario generator for realistic delays
     private val delayScenarioGenerator = DelayScenarioGenerator(random)
-    private val logger = KotlinLogging.logger {}
-    
+
     // Major European and North American airports with their coordinates
     private val airports = mapOf(
         "FRA" to Airport("Frankfurt", 50.0379, 8.5622),
@@ -59,7 +61,7 @@ class EventGenerator(
         "VIE" to Airport("Vienna", 48.1102, 16.5697),
         "IST" to Airport("Istanbul", 41.2606, 28.7425)
     )
-    
+
     // Major airlines with their IATA codes
     private val airlines = mapOf(
         "LH" to "Lufthansa",
@@ -75,10 +77,10 @@ class EventGenerator(
         "OS" to "Austrian Airlines",
         "TK" to "Turkish Airlines"
     )
-    
+
     // Active flights being simulated with their current positions and statuses
     private val activeFlights = mutableMapOf<String, FlightStatus>()
-    
+
     /**
      * Generates a new flight event.
      * This could be a new flight, an update to an existing flight, or a special event.
@@ -91,7 +93,7 @@ class EventGenerator(
             updateExistingFlight()
         }
     }
-    
+
     /**
      * Creates a new flight with random origin and destination.
      */
@@ -102,15 +104,15 @@ class EventGenerator(
         do {
             destinationCode = airports.keys.random(random)
         } while (destinationCode == originCode)
-        
+
         val origin = airports[originCode]!!
         val destination = airports[destinationCode]!!
-        
+
         // Select random airline and create flight number
         val airlineCode = airlines.keys.random(random)
         val flightNumber = random.nextInt(100, 1000)
         val flightId = "$airlineCode$flightNumber"
-        
+
         // Initialize flight status
         val status = FlightStatus(
             originCode = originCode,
@@ -124,11 +126,11 @@ class EventGenerator(
             targetLongitude = destination.longitude,
             delayMinutes = 0
         )
-        
+
         activeFlights[flightId] = status
-        
+
         logger.info { "Created new flight: $flightId from $originCode to $destinationCode" }
-        
+
         // Return a DEPARTURE event
         return FlightEvent(
             flightId = flightId,
@@ -142,18 +144,18 @@ class EventGenerator(
             destination = destinationCode
         )
     }
-    
+
     /**
      * Updates an existing flight's position or status.
      */
     private fun updateExistingFlight(): FlightEvent {
         val flightId = activeFlights.keys.random(random)
         val status = activeFlights[flightId]!!
-        
+
         // Extract airline code from flight ID
         val airlineCode = flightId.take(2)
         val airline = airlines[airlineCode] ?: "Unknown Airline"
-        
+
         // Decide what type of event to generate
         return when {
             // Flight completed - generate ARRIVAL event
@@ -169,14 +171,14 @@ class EventGenerator(
                     origin = status.originCode,
                     destination = status.destinationCode
                 )
-                
+
                 // Remove flight from active flights
                 activeFlights.remove(flightId)
                 logger.info { "Flight $flightId arrived at ${status.destinationCode}" }
-                
+
                 event
             }
-            
+
             // Check for delay using the delay scenario generator
             status.delayMinutes == 0 -> {
                 // Get delay scenario based on flight phase
@@ -185,12 +187,12 @@ class EventGenerator(
                     destinationAirport = status.destinationCode,
                     currentProgress = status.progress
                 )
-                
+
                 if (delayScenario != null && delayScenario.first) {
                     // Apply the delay
                     val delayMinutes = delayScenario.second
                     status.delayMinutes = delayMinutes
-                    
+
                     FlightEvent(
                         flightId = flightId,
                         airline = airline,
@@ -208,7 +210,7 @@ class EventGenerator(
                     generatePositionUpdateEvent(flightId, airline, status)
                 }
             }
-            
+
             // Cancellation (configurable probability)
             random.nextDouble() < cancellationProbability -> {
                 val event = FlightEvent(
@@ -222,25 +224,25 @@ class EventGenerator(
                     origin = status.originCode,
                     destination = status.destinationCode
                 )
-                
+
                 // Remove flight from active flights
                 activeFlights.remove(flightId)
                 logger.info { "Flight $flightId cancelled" }
-                
+
                 event
             }
-            
+
             // Regular position update (most common)
             else -> {
                 // Calculate new position along great circle path
                 updateFlightPosition(status)
-                
+
                 // Generate position update event
                 generatePositionUpdateEvent(flightId, airline, status)
             }
         }
     }
-    
+
     /**
      * Generates a position update event for a flight.
      */
@@ -257,7 +259,7 @@ class EventGenerator(
             destination = status.destinationCode
         )
     }
-    
+
     /**
      * Updates a flight's position along a great circle path between origin and destination.
      * This creates a more realistic curved flight path over the Earth's surface.
@@ -266,17 +268,17 @@ class EventGenerator(
         // Use great circle calculations for realistic flight paths
         // Earth radius in kilometers
         val earthRadius = 6371.0
-        
+
         // Convert coordinates from degrees to radians
         val startLat = Math.toRadians(status.currentLatitude)
         val startLon = Math.toRadians(status.currentLongitude)
         val endLat = Math.toRadians(status.targetLatitude)
         val endLon = Math.toRadians(status.targetLongitude)
-        
+
         // Calculate the distance and bearing between current position and destination
         val distance = calculateDistance(startLat, startLon, endLat, endLon, earthRadius)
         val bearing = calculateBearing(startLat, startLon, endLat, endLon)
-        
+
         // Calculate the distance to move in this update (based on progress)
         // We want to move faster in the middle of the flight and slower at takeoff/landing
         val progressFactor = if (status.progress < 0.2 || status.progress > 0.8) {
@@ -286,10 +288,10 @@ class EventGenerator(
             // Faster during cruise
             0.01 + random.nextDouble(0.005, 0.015)
         }
-        
+
         // Update progress
         status.progress = minOf(1.0, status.progress + progressFactor)
-        
+
         // If we're very close to destination or at destination, just arrive
         if (distance < 50 || status.progress >= 1.0) {
             status.currentLatitude = status.targetLatitude
@@ -297,41 +299,41 @@ class EventGenerator(
             status.progress = 1.0
             return
         }
-        
+
         // Calculate new position
         val newPosition = calculateNewPosition(startLat, startLon, bearing, progressFactor * distance)
-        
+
         // Update current position
         status.currentLatitude = Math.toDegrees(newPosition.first)
         status.currentLongitude = Math.toDegrees(newPosition.second)
-        
+
         // Add some randomness to simulate weather and other factors (smaller at higher altitudes)
         val weatherFactor = if (status.progress > 0.2 && status.progress < 0.8) 0.01 else 0.03
         status.currentLatitude += random.nextDouble(-weatherFactor, weatherFactor)
         status.currentLongitude += random.nextDouble(-weatherFactor, weatherFactor)
     }
-    
+
     /**
      * Calculates the distance between two points on the Earth's surface using the Haversine formula.
      * @return Distance in kilometers
      */
     private fun calculateDistance(
-        startLat: Double, startLon: Double, 
-        endLat: Double, endLon: Double, 
+        startLat: Double, startLon: Double,
+        endLat: Double, endLon: Double,
         radius: Double
     ): Double {
         val dLat = endLat - startLat
         val dLon = endLon - startLon
-        
-        val a = sin(dLat / 2).pow(2) + 
-                cos(startLat) * cos(endLat) * 
+
+        val a = sin(dLat / 2).pow(2) +
+                cos(startLat) * cos(endLat) *
                 sin(dLon / 2).pow(2)
-        
+
         val c = 2 * kotlin.math.atan2(sqrt(a), sqrt(1.0 - a))
-        
+
         return radius * c
     }
-    
+
     /**
      * Calculates the initial bearing from start point to end point.
      * @return Bearing in radians
@@ -341,39 +343,39 @@ class EventGenerator(
         endLat: Double, endLon: Double
     ): Double {
         val dLon = endLon - startLon
-        
+
         val y = sin(dLon) * cos(endLat)
-        val x = cos(startLat) * sin(endLat) - 
+        val x = cos(startLat) * sin(endLat) -
                 sin(startLat) * cos(endLat) * cos(dLon)
-        
+
         return kotlin.math.atan2(y, x)
     }
-    
+
     /**
      * Calculates a new position given a starting point, bearing, and distance.
      * @return Pair of (latitude, longitude) in radians
      */
     private fun calculateNewPosition(
-        startLat: Double, startLon: Double, 
+        startLat: Double, startLon: Double,
         bearing: Double, distance: Double
     ): Pair<Double, Double> {
         val earthRadius = 6371.0 // kilometers
-        
+
         val distRatio = distance / earthRadius
-        
+
         val newLat = asin(
-            sin(startLat) * cos(distRatio) + 
-            cos(startLat) * sin(distRatio) * cos(bearing)
+            sin(startLat) * cos(distRatio) +
+                    cos(startLat) * sin(distRatio) * cos(bearing)
         )
-        
+
         val newLon = startLon + kotlin.math.atan2(
             sin(bearing) * sin(distRatio) * cos(startLat),
             cos(distRatio) - sin(startLat) * sin(newLat)
         )
-        
+
         return Pair(newLat, newLon)
     }
-    
+
     /**
      * Represents an airport with its name and coordinates.
      */
@@ -382,7 +384,7 @@ class EventGenerator(
         val latitude: Double,
         val longitude: Double
     )
-    
+
     /**
      * Tracks the current status of an active flight.
      */
