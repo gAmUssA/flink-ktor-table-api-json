@@ -33,7 +33,7 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-java-time:0.45.0")
     
     // Kafka client for WebSocket updates
-    implementation("org.apache.kafka:kafka-clients:3.5.1")
+    implementation("org.apache.kafka:kafka-clients:3.9.1")
     
     // Testing
     testImplementation("io.ktor:ktor-server-test-host:2.3.13")
