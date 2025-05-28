@@ -45,7 +45,7 @@ subprojects {
         implementation("org.slf4j:slf4j-api:2.0.9")
         implementation("ch.qos.logback:logback-classic:1.4.11")
         implementation("ch.qos.logback:logback-core:1.4.11")
-        implementation("io.github.oshai:kotlin-logging-jvm:5.1.0")
+        implementation("io.github.oshai:kotlin-logging-jvm:5.1.4")
 
         // Testing
         testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.2")
